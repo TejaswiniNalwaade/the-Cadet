@@ -1,5 +1,5 @@
 // Base URL of your FastAPI backend
-const API = "http://localhost:8000";
+const API = const API = "https://the-cadet.onrender.com";
 
 // ── Token helpers ─────────────────────────────────────────────────────────
 function getToken()  { return localStorage.getItem("ncc_token"); }
