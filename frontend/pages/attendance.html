@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance — NCC Management</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><h2>🎖️ The Cadet</h2><p>NCC Management</p></div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="user-initials">?</div>
+      <div>
+        <div style="font-size:13px;font-weight:600" id="user-name">—</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45)" id="user-role">—</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="cadets.html">👥 Cadets</a>
+      <a href="attendance.html" class="active">✅ Attendance</a>
+      <a href="events.html">🚩 Events</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <a href="profile.html">👤 My Profile</a>
+      <a href="admin.html">🛡️ Admin Panel</a>
+    </nav>
+    <div style="padding:16px;margin-top:auto;border-top:1px solid rgba(255,255,255,0.1)">
+      <button class="btn btn-sm" style="width:100%;justify-content:center;color:#fff;border-color:rgba(255,255,255,0.2)" onclick="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1>✅ Attendance</h1>
+      <div style="display:flex;align-items:center;gap:10px">
+        <label style="font-size:13px;color:#6c757d">Date:</label>
+        <input type="date" id="att-date" class="form-control" style="width:160px" onchange="loadAttendance()"/>
+        <button class="btn btn-primary" onclick="saveAttendance()">💾 Save Attendance</button>
+      </div>
+    </div>
+    <div class="content">
+      <div id="alert-box"></div>
+
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card"><div class="stat-label">Present</div><div class="stat-value green" id="count-present">0</div></div>
+        <div class="stat-card"><div class="stat-label">Absent</div><div class="stat-value red" id="count-absent">0</div></div>
+        <div class="stat-card"><div class="stat-label">On Leave</div><div class="stat-value amber" id="count-leave">0</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Mark Attendance</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Roll No</th><th>Name</th><th>Unit</th><th>Status</th></tr></thead>
+            <tbody id="att-tbody"><tr><td colspan="4" style="text-align:center;padding:30px;color:#6c757d">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+  // 🔒 ADMIN ONLY PAGE
+  requireAdmin();
+
+  document.getElementById('user-name').textContent     = getName();
+  document.getElementById('user-role').textContent     = 'System Admin';
+  document.getElementById('user-initials').textContent = (getName()||'A').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  function logout() { localStorage.clear(); window.location.href = '../index.html'; }
+
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('att-date').value = today;
+
+  let allCadets = [];
+  let existingAtt = {};
+
+  function updateCounts() {
+    const selects = document.querySelectorAll('.att-select');
+    let p=0, a=0, l=0;
+    selects.forEach(s => { if(s.value==='present') p++; else if(s.value==='absent') a++; else l++; });
+    document.getElementById('count-present').textContent = p;
+    document.getElementById('count-absent').textContent  = a;
+    document.getElementById('count-leave').textContent   = l;
+  }
+
+  async function loadAttendance() {
+    const date = document.getElementById('att-date').value;
+    if (!allCadets.length) allCadets = (await apiGetCadets()).filter(c => c.approved);
+
+    const records = await apiGetAttendanceByDate(date);
+    existingAtt = {};
+    records.forEach(r => existingAtt[r.cadet_id] = r.status);
+
+    document.getElementById('att-tbody').innerHTML = allCadets.length
+      ? allCadets.map(c => `
+        <tr>
+          <td style="color:#6c757d;font-size:12px">${c.roll_no}</td>
+          <td><strong>${c.name}</strong></td>
+          <td style="font-size:13px">${c.unit}</td>
+          <td>
+            <select class="att-select form-control" style="width:130px" data-id="${c.id}" onchange="updateCounts()">
+              <option value="present" ${(existingAtt[c.id]||'present')==='present'?'selected':''}>✅ Present</option>
+              <option value="absent"  ${existingAtt[c.id]==='absent' ?'selected':''}>❌ Absent</option>
+              <option value="leave"   ${existingAtt[c.id]==='leave'  ?'selected':''}>🟡 On Leave</option>
+            </select>
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="4" style="text-align:center;padding:30px;color:#6c757d">No approved cadets found</td></tr>';
+    updateCounts();
+  }
+
+  async function saveAttendance() {
+    const date    = document.getElementById('att-date').value;
+    const selects = document.querySelectorAll('.att-select');
+    const entries = Array.from(selects).map(s => ({ cadet_id: parseInt(s.dataset.id), status: s.value }));
+
+    const res = await apiMarkAttendance(date, entries);
+    if (res.detail) {
+      document.getElementById('alert-box').innerHTML = `<div class="alert alert-danger">${res.detail}</div>`;
+    } else {
+      document.getElementById('alert-box').innerHTML = `<div class="alert alert-success">${res.message}</div>`;
+    }
+    setTimeout(() => document.getElementById('alert-box').innerHTML = '', 3000);
+  }
+
+  loadAttendance();
+</script>
+</body>
+</html>

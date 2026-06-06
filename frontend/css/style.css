@@ -1,0 +1,107 @@
+/* ── Reset & Base ─────────────────────────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #1a1a2e; }
+
+/* ── Sidebar Layout ──────────────────────────────────────────────────────── */
+.layout    { display: flex; min-height: 100vh; }
+.sidebar   { width: 220px; background: #1a2744; color: #fff; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+.main      { margin-left: 220px; flex: 1; }
+
+.sidebar-logo   { padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-logo h2 { font-size: 17px; color: #fff; }
+.sidebar-logo p  { font-size: 11px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+.sidebar-user   { padding: 14px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sidebar-avatar { width: 34px; height: 34px; border-radius: 50%; background: #3d5a99; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; }
+
+.nav        { padding: 12px 0; }
+.nav a      { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 13px; color: rgba(255,255,255,0.7); text-decoration: none; border-left: 3px solid transparent; transition: all 0.15s; }
+.nav a:hover   { background: rgba(255,255,255,0.06); color: #fff; }
+.nav a.active  { background: rgba(255,255,255,0.1); color: #fff; border-left-color: #5b8dee; }
+
+/* ── Topbar ──────────────────────────────────────────────────────────────── */
+.topbar { background: #fff; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e6ea; position: sticky; top: 0; z-index: 10; }
+.topbar h1 { font-size: 16px; font-weight: 600; }
+
+/* ── Page Content ────────────────────────────────────────────────────────── */
+.content { padding: 24px; }
+
+/* ── Stats Grid ──────────────────────────────────────────────────────────── */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card  { background: #fff; border-radius: 10px; border: 1px solid #e2e6ea; padding: 16px 18px; }
+.stat-label { font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.stat-value { font-size: 28px; font-weight: 700; line-height: 1; }
+.stat-sub   { font-size: 12px; color: #6c757d; margin-top: 4px; }
+.blue { color: #185FA5; } .green { color: #3B6D11; } .amber { color: #854F0B; } .red { color: #A32D2D; }
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.card        { background: #fff; border-radius: 10px; border: 1px solid #e2e6ea; margin-bottom: 20px; }
+.card-header { padding: 14px 18px; border-bottom: 1px solid #e2e6ea; display: flex; align-items: center; justify-content: space-between; }
+.card-header h3 { font-size: 14px; font-weight: 600; }
+.card-body   { padding: 16px 18px; }
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+.table-wrap  { overflow-x: auto; }
+table        { width: 100%; border-collapse: collapse; font-size: 13px; }
+th           { text-align: left; padding: 9px 12px; font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid #e2e6ea; font-weight: 600; background: #f8f9fa; }
+td           { padding: 11px 12px; border-bottom: 1px solid #f0f2f5; }
+tr:last-child td { border-bottom: none; }
+tr:hover td  { background: #f8f9fa; }
+
+/* ── Badges ──────────────────────────────────────────────────────────────── */
+.badge      { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+.b-blue     { background: #cce5ff; color: #004085; }
+.b-green    { background: #d4edda; color: #155724; }
+.b-amber    { background: #fff3cd; color: #856404; }
+.b-gray     { background: #e9ecef; color: #495057; }
+.b-red      { background: #f8d7da; color: #721c24; }
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn        { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; border: 1px solid #dee2e6; background: #fff; color: #1a1a2e; transition: all 0.15s; text-decoration: none; }
+.btn:hover  { background: #f8f9fa; }
+.btn-primary { background: #1a2744; color: #fff; border-color: #1a2744; }
+.btn-primary:hover { background: #243660; }
+.btn-sm     { padding: 5px 10px; font-size: 12px; }
+.btn-danger { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+
+/* ── Forms ───────────────────────────────────────────────────────────────── */
+.form-group   { margin-bottom: 14px; }
+.form-label   { display: block; font-size: 12px; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 5px; }
+.form-control { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid #dee2e6; font-size: 13px; color: #1a1a2e; background: #fff; transition: border-color 0.15s; }
+.form-control:focus { outline: none; border-color: #185FA5; }
+.form-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── Modal ───────────────────────────────────────────────────────────────── */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal        { background: #fff; border-radius: 12px; width: 440px; max-width: 95vw; box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+.modal-header { padding: 16px 20px; border-bottom: 1px solid #e2e6ea; display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { font-size: 15px; font-weight: 600; }
+.modal-body   { padding: 20px; }
+.modal-footer { padding: 12px 20px; border-top: 1px solid #e2e6ea; display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ── Progress bar ────────────────────────────────────────────────────────── */
+.progress     { background: #e9ecef; border-radius: 4px; height: 6px; overflow: hidden; }
+.progress-bar { height: 100%; border-radius: 4px; }
+
+/* ── Alert ───────────────────────────────────────────────────────────────── */
+.alert        { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 14px; }
+.alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.alert-danger  { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+/* ── Login page ──────────────────────────────────────────────────────────── */
+.login-page   { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f0f2f5; }
+.login-card   { background: #fff; border-radius: 14px; padding: 36px 32px; width: 380px; border: 1px solid #e2e6ea; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+.login-logo   { text-align: center; margin-bottom: 24px; }
+.login-logo h1 { font-size: 22px; color: #1a2744; }
+.login-logo p  { font-size: 12px; color: #6c757d; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+/* ── Attendance status colors ────────────────────────────────────────────── */
+select.att-select { padding: 5px 8px; border-radius: 6px; border: 1px solid #dee2e6; font-size: 12px; cursor: pointer; }
+
+/* ── Announcement item ───────────────────────────────────────────────────── */
+.ann-item      { padding: 14px 0; border-bottom: 1px solid #f0f2f5; }
+.ann-item:last-child { border-bottom: none; }
+.ann-title     { font-size: 14px; font-weight: 600; }
+.ann-meta      { font-size: 12px; color: #6c757d; margin-top: 2px; }
+.ann-body      { font-size: 13px; color: #495057; margin-top: 6px; line-height: 1.6; }

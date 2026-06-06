@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile — NCC Management</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+    .profile-hero {
+      background: linear-gradient(135deg, #1a2744 0%, #2d4a8a 100%);
+      border-radius: 12px;
+      padding: 28px 24px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-hero::after {
+      content: '🎖️';
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 60px;
+      opacity: 0.1;
+    }
+    .profile-avatar-lg {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(91,141,238,0.3);
+      border: 3px solid rgba(91,141,238,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .profile-hero-info h2 { color: #fff; font-size: 20px; margin-bottom: 4px; }
+    .profile-hero-info p  { color: rgba(255,255,255,0.55); font-size: 13px; }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f2f5;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-icon { font-size: 16px; width: 24px; text-align: center; margin-top: 2px; }
+    .info-label { font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; margin-bottom: 2px; }
+    .info-val   { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+
+    .approval-banner {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #856404;
+    }
+
+    .change-password-form { display: none; }
+    .change-password-form.open { display: block; }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🎖️ The Cadet</h2>
+      <p>NCC Management</p>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="user-initials">?</div>
+      <div>
+        <div style="font-size:13px;font-weight:600" id="user-name">Loading...</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45)" id="user-role">—</div>
+      </div>
+    </div>
+    <!-- ADMIN NAV -->
+    <nav class="nav" id="nav-admin" style="display:none">
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="cadets.html">👥 Cadets</a>
+      <a href="attendance.html">✅ Attendance</a>
+      <a href="events.html">🚩 Events</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <a href="profile.html" class="active">👤 My Profile</a>
+      <a href="admin.html">🛡️ Admin Panel</a>
+    </nav>
+    <!-- CADET NAV -->
+    <nav class="nav" id="nav-cadet" style="display:none">
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="events.html">🚩 Events</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <a href="profile.html" class="active">👤 My Profile</a>
+    </nav>
+    <div style="padding:16px;margin-top:auto;border-top:1px solid rgba(255,255,255,0.1)">
+      <button class="btn btn-sm" style="width:100%;justify-content:center;color:#fff;border-color:rgba(255,255,255,0.2)" onclick="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <h1>👤 My Profile</h1>
+      <span style="font-size:13px;color:#6c757d">Account Details</span>
+    </div>
+    <div class="content">
+
+      <div id="pending-banner" class="approval-banner" style="display:none">
+        ⏳ <strong>Pending Approval</strong> — Your cadet profile is waiting for officer approval. Some features may be limited.
+      </div>
+
+      <div id="alert-global"></div>
+
+      <!-- HERO -->
+      <div class="profile-hero" id="profile-hero">
+        <div class="profile-avatar-lg" id="hero-initials">?</div>
+        <div class="profile-hero-info">
+          <h2 id="hero-name">Loading...</h2>
+          <p id="hero-sub">—</p>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <!-- Account Info -->
+        <div class="card">
+          <div class="card-header"><h3>Account Information</h3></div>
+          <div class="card-body" id="account-info">
+            <div style="text-align:center;color:#6c757d;padding:20px">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Cadet Info (shown only for cadets) -->
+        <div class="card" id="cadet-info-card">
+          <div class="card-header"><h3>Cadet Details</h3></div>
+          <div class="card-body" id="cadet-info">
+            <div style="text-align:center;color:#6c757d;padding:20px">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attendance Summary (for cadets) -->
+      <div class="card" id="attendance-card" style="display:none">
+        <div class="card-header"><h3>My Attendance Summary</h3></div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center" id="att-summary">
+            <div class="stat-card-sm"><div class="val blue" id="att-total">—</div><div class="lbl">Total Days</div></div>
+            <div class="stat-card-sm"><div class="val green" id="att-present">—</div><div class="lbl">Present</div></div>
+            <div class="stat-card-sm"><div class="val red" id="att-absent">—</div><div class="lbl">Absent</div></div>
+          </div>
+          <div style="margin-top:16px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
+              <span>Attendance Rate</span>
+              <span id="att-pct-label" style="font-weight:700">—</span>
+            </div>
+            <div class="progress" style="height:10px">
+              <div class="progress-bar" id="att-bar" style="width:0%;background:#639922"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Password -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Security</h3>
+          <button class="btn btn-sm" onclick="togglePasswordForm()">🔑 Change Password</button>
+        </div>
+        <div class="card-body change-password-form" id="pwd-form">
+          <div id="pwd-alert"></div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Current Password</label>
+              <input type="password" id="pwd-current" class="form-control" placeholder="••••••••"/>
+            </div>
+            <div></div>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input type="password" id="pwd-new" class="form-control" placeholder="Min 8 chars" oninput="checkPwdStrength(this.value,'prof-pwd-strength')"/>
+              <small id="prof-pwd-strength" style="display:block;margin-top:4px;font-size:0.78rem;"></small>
+              <small style="color:#6c757d;font-size:0.75rem;">Must include uppercase, lowercase, number &amp; special character.</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm New Password</label>
+              <input type="password" id="pwd-confirm" class="form-control" placeholder="••••••••"/>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Stat card style inline since profile is standalone -->
+<style>
+  .stat-card-sm { background:#f8f9fa; border-radius:10px; border:1px solid #e2e6ea; padding:14px 16px; text-align:center; }
+  .stat-card-sm .val { font-size:26px; font-weight:700; }
+  .stat-card-sm .lbl { font-size:11px; color:#6c757d; text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+</style>
+
+<script src="../js/api.js"></script>
+<script>
+  requireAuth();
+
+  const role = getRole();
+  const name = getName();
+
+  // Sidebar
+  document.getElementById('user-name').textContent     = name || 'User';
+  document.getElementById('user-role').textContent     = role === 'officer' ? 'NCC Officer' : role === 'admin' ? 'Admin' : 'Cadet';
+  document.getElementById('user-initials').textContent = (name || 'U').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+
+  if (role === 'admin') {
+    document.getElementById('nav-admin').style.display = '';
+  } else {
+    document.getElementById('nav-cadet').style.display = '';
+  }
+
+  function logout() { localStorage.clear(); window.location.href = '../index.html'; }
+
+  // Hero
+  const initials = (name || 'U').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('hero-initials').textContent = initials;
+  document.getElementById('hero-name').textContent     = name || 'User';
+  document.getElementById('hero-sub').textContent      =
+    role === 'admin' ? '🛡️ System Administrator' :
+    role === 'officer' ? '⚓ NCC Officer' : '🪖 NCC Cadet';
+
+  // Account info section
+  document.getElementById('account-info').innerHTML = `
+    <div class="info-row">
+      <span class="info-icon">👤</span>
+      <div><div class="info-label">Full Name</div><div class="info-val">${name || '—'}</div></div>
+    </div>
+    <div class="info-row">
+      <span class="info-icon">🏷️</span>
+      <div><div class="info-label">Role</div><div class="info-val">${role === 'admin' ? 'Administrator' : role === 'officer' ? 'Officer' : 'Cadet'}</div></div>
+    </div>
+    <div class="info-row">
+      <span class="info-icon">🆔</span>
+      <div><div class="info-label">User ID</div><div class="info-val">#${getUserId() || '—'}</div></div>
+    </div>
+  `;
+
+  // Load cadets list to find this user's cadet profile
+  async function loadProfile() {
+    if (role === 'cadet') {
+      document.getElementById('attendance-card').style.display = '';
+      try {
+        const cadets = await apiGetCadets();
+        const userId = parseInt(getUserId());
+        // Find this user's cadet record by matching user_id
+        const me = cadets.find(c => c.user_id === userId) || cadets.find(c => c.name === name);
+
+        if (me) {
+          if (!me.approved) {
+            document.getElementById('pending-banner').style.display = 'flex';
+          }
+
+          document.getElementById('cadet-info').innerHTML = `
+            <div class="info-row">
+              <span class="info-icon">🔢</span>
+              <div><div class="info-label">Roll Number</div><div class="info-val">${me.roll_no || '—'}</div></div>
+            </div>
+            <div class="info-row">
+              <span class="info-icon">🎖️</span>
+              <div><div class="info-label">Rank</div><div class="info-val">${me.rank || 'Cadet'}</div></div>
+            </div>
+            <div class="info-row">
+              <span class="info-icon">🏢</span>
+              <div><div class="info-label">Unit</div><div class="info-val">${me.unit || '—'}</div></div>
+            </div>
+            <div class="info-row">
+              <span class="info-icon">✅</span>
+              <div><div class="info-label">Status</div><div class="info-val">${me.approved ? '<span class="badge b-green">Approved</span>' : '<span class="badge b-amber">Pending</span>'}</div></div>
+            </div>
+          `;
+
+          // Attendance summary
+          const present = me.attendance || 0;
+          const total   = 100; // placeholder; replace with actual if API provides
+          document.getElementById('att-total').textContent   = '—';
+          document.getElementById('att-present').textContent = present + '%';
+          document.getElementById('att-absent').textContent  = (100 - present) + '%';
+          document.getElementById('att-pct-label').textContent = present + '%';
+          const bar = document.getElementById('att-bar');
+          bar.style.width      = present + '%';
+          bar.style.background = present >= 90 ? '#639922' : present >= 75 ? '#BA7517' : '#E24B4A';
+        } else {
+          document.getElementById('cadet-info').innerHTML = '<p style="color:#6c757d;font-size:13px">No cadet profile found.</p>';
+        }
+      } catch(e) {
+        document.getElementById('cadet-info').innerHTML = '<p style="color:#6c757d;font-size:13px">Could not load cadet details.</p>';
+      }
+    } else {
+      document.getElementById('cadet-info-card').style.display = 'none';
+    }
+  }
+
+  loadProfile();
+
+  function togglePasswordForm() {
+    const f = document.getElementById('pwd-form');
+    f.classList.toggle('open');
+  }
+
+  async function changePassword() {
+    const current = document.getElementById('pwd-current').value;
+    const newPwd  = document.getElementById('pwd-new').value;
+    const confirm = document.getElementById('pwd-confirm').value;
+    const alertEl = document.getElementById('pwd-alert');
+
+    if (!current || !newPwd || !confirm) {
+      alertEl.innerHTML = '<div class="alert alert-danger">Please fill all password fields</div>'; return;
+    }
+    if (newPwd !== confirm) {
+      alertEl.innerHTML = '<div class="alert alert-danger">New passwords do not match</div>'; return;
+    }
+    if (newPwd.length < 6) {
+      alertEl.innerHTML = '<div class="alert alert-danger">New password must be at least 6 characters</div>'; return;
+    }
+
+    // Call change-password endpoint (to be added to backend)
+    try {
+      const res = await fetch(`${API}/auth/change-password`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ current_password: current, new_password: newPwd })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alertEl.innerHTML = '<div class="alert alert-success">✅ Password updated successfully</div>';
+        document.getElementById('pwd-current').value = '';
+        document.getElementById('pwd-new').value     = '';
+        document.getElementById('pwd-confirm').value = '';
+      } else {
+        alertEl.innerHTML = `<div class="alert alert-danger">${data.detail || 'Failed to update password'}</div>`;
+      }
+    } catch {
+      alertEl.innerHTML = '<div class="alert alert-danger">Server error. Please try again.</div>';
+    }
+  }
+
+  function checkPwdStrength(pw, targetId) {
+    const el = document.getElementById(targetId);
+    if (!pw) { el.textContent = ''; return; }
+    let score = 0;
+    if (pw.length >= 8)              score++;
+    if (/[A-Z]/.test(pw))            score++;
+    if (/[a-z]/.test(pw))            score++;
+    if (/\d/.test(pw))               score++;
+    if (/[!@#$%^&*()\-_=+\[\]{};:'",.<>?/`~\\|]/.test(pw)) score++;
+    const labels = ['Very Weak','Weak','Fair','Good','Strong'];
+    const colors = ['#dc3545','#fd7e14','#ffc107','#198754','#0d6efd'];
+    el.textContent = '🔒 ' + (labels[score-1] || 'Very Weak');
+    el.style.color = colors[score-1] || '#dc3545';
+  }
+</script>
+</body>
+</html>

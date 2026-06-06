@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — NCC Management</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+    .tab-bar { display:flex; gap:4px; margin-bottom:20px; background:#fff; padding:6px; border-radius:10px; border:1px solid #e2e6ea; }
+    .tab-btn { padding:8px 18px; border-radius:7px; border:none; background:transparent; cursor:pointer; font-size:13px; font-weight:500; color:#6c757d; transition:all .15s; }
+    .tab-btn.active { background:#1a2744; color:#fff; }
+    .tab-pane { display:none; }
+    .tab-pane.active { display:block; }
+    .role-badge { display:inline-block; font-size:11px; padding:2px 9px; border-radius:20px; font-weight:600; }
+    .role-admin   { background:#e9d8fd; color:#553c9a; }
+    .role-officer { background:#bee3f8; color:#2a4365; }
+    .role-cadet   { background:#feebc8; color:#7b341e; }
+    .action-btns { display:flex; gap:6px; }
+    .stat-card-sm { background:#fff; border-radius:10px; border:1px solid #e2e6ea; padding:14px 16px; text-align:center; }
+    .stat-card-sm .val { font-size:26px; font-weight:700; }
+    .stat-card-sm .lbl { font-size:11px; color:#6c757d; text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+    .pending-row { background:#fffbeb; }
+    .search-bar { display:flex; gap:10px; margin-bottom:16px; align-items:center; }
+    .search-bar input { flex:1; padding:8px 12px; border-radius:8px; border:1px solid #dee2e6; font-size:13px; }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🎖️ The Cadet</h2>
+      <p>NCC Management</p>
+    </div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="user-initials">?</div>
+      <div>
+        <div style="font-size:13px;font-weight:600" id="user-name">Loading...</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45)" id="user-role">—</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="cadets.html">👥 Cadets</a>
+      <a href="attendance.html">✅ Attendance</a>
+      <a href="events.html">🚩 Events</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <a href="profile.html">👤 My Profile</a>
+      <a href="admin.html" class="active">🛡️ Admin Panel</a>
+    </nav>
+    <div style="padding:16px;margin-top:auto;border-top:1px solid rgba(255,255,255,0.1)">
+      <button class="btn btn-sm" style="width:100%;justify-content:center;color:#fff;border-color:rgba(255,255,255,0.2)" onclick="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <h1>🛡️ Admin Panel</h1>
+      <span style="font-size:13px;color:#6c757d">System Administration</span>
+    </div>
+    <div class="content">
+
+      <!-- STATS ROW -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px" id="admin-stats-row">
+        <div class="stat-card-sm"><div class="val blue" id="s-users">—</div><div class="lbl">Total Users</div></div>
+        <div class="stat-card-sm"><div class="val amber" id="s-pending">—</div><div class="lbl">Pending Approval</div></div>
+        <div class="stat-card-sm"><div class="val green" id="s-approved">—</div><div class="lbl">Approved Cadets</div></div>
+        <div class="stat-card-sm"><div class="val blue" id="s-officers">—</div><div class="lbl">Officers</div></div>
+        <div class="stat-card-sm"><div class="val red" id="s-events">—</div><div class="lbl">Events</div></div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('users')">👤 User Management</button>
+        <button class="tab-btn" onclick="switchTab('pending')">⏳ Pending Approvals</button>
+        <button class="tab-btn" onclick="switchTab('create')">➕ Create User</button>
+      </div>
+
+      <!-- TAB: USER MANAGEMENT -->
+      <div class="tab-pane active" id="tab-users">
+        <div class="card">
+          <div class="card-header">
+            <h3>All Users</h3>
+            <button class="btn btn-sm btn-primary" onclick="loadUsers()">↻ Refresh</button>
+          </div>
+          <div class="search-bar" style="padding:12px 18px 0">
+            <input type="text" id="user-search" placeholder="Search by name, email or role…" oninput="filterUsers()"/>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody">
+                <tr><td colspan="6" style="text-align:center;color:#6c757d;padding:24px">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: PENDING APPROVALS -->
+      <div class="tab-pane" id="tab-pending">
+        <div class="card">
+          <div class="card-header">
+            <h3>Cadets Awaiting Approval</h3>
+            <button class="btn btn-sm btn-primary" onclick="loadPending()">↻ Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Roll No</th><th>Name</th><th>Email</th><th>Unit</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="pending-tbody">
+                <tr><td colspan="5" style="text-align:center;color:#6c757d;padding:24px">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: CREATE USER -->
+      <div class="tab-pane" id="tab-create">
+        <div class="card" style="max-width:480px">
+          <div class="card-header"><h3>Create New User</h3></div>
+          <div class="card-body">
+            <div id="create-alert"></div>
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="c-name" class="form-control" placeholder="Ramesh Kumar"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" id="c-email" class="form-control" placeholder="user@ncc.com"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input type="password" id="c-password" class="form-control" placeholder="Min 8 chars" oninput="checkPwdStrength(this.value,'c-pwd-strength')"/>
+              <small id="c-pwd-strength" style="display:block;margin-top:4px;font-size:0.78rem;"></small>
+              <small style="color:#6c757d;font-size:0.75rem;">Must include uppercase, lowercase, number &amp; special character.</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Role</label>
+              <select id="c-role" class="form-control">
+                <option value="cadet">Cadet</option>
+                <option value="officer">Officer</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="createUser()">Create User</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div>
+
+<!-- EDIT USER MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit User</h3>
+      <button class="btn btn-sm" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id"/>
+      <div id="edit-alert"></div>
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input type="text" id="edit-name" class="form-control"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="edit-email" class="form-control"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select id="edit-role" class="form-control">
+          <option value="cadet">Cadet</option>
+          <option value="officer">Officer</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">New Password <span style="color:#6c757d;font-weight:400">(leave blank to keep current)</span></label>
+        <input type="password" id="edit-password" class="form-control" placeholder="Min 8 chars" oninput="checkPwdStrength(this.value,'edit-pwd-strength')"/>
+        <small id="edit-pwd-strength" style="display:block;margin-top:4px;font-size:0.78rem;"></small>
+        <small style="color:#6c757d;font-size:0.75rem;">Must include uppercase, lowercase, number &amp; special character.</small>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+  requireAdmin();
+
+  document.getElementById('user-name').textContent     = getName() || 'Admin';
+  const _role = getRole(); document.getElementById('user-role').textContent = 'System Admin';
+  document.getElementById('user-initials').textContent = (getName() || 'A').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+
+  function logout() { localStorage.clear(); window.location.href = '../index.html'; }
+
+  // ── Tab switching ────────────────────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    const idx = ['users','pending','create'].indexOf(name);
+    document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+    if (name === 'users')   loadUsers();
+    if (name === 'pending') loadPending();
+  }
+
+  // ── Stats ────────────────────────────────────────────────────────────────
+  async function loadStats() {
+    const s = await apiAdminStats();
+    document.getElementById('s-users').textContent   = s.total_users   ?? '—';
+    document.getElementById('s-pending').textContent = s.pending_cadets ?? '—';
+    document.getElementById('s-approved').textContent= s.approved_cadets?? '—';
+    document.getElementById('s-officers').textContent= s.officers       ?? '—';
+    document.getElementById('s-events').textContent  = s.total_events   ?? '—';
+  }
+
+  // ── Users ────────────────────────────────────────────────────────────────
+  let allUsers = [];
+
+  function roleBadge(role) {
+    const cls = role === 'admin' ? 'role-admin' : role === 'officer' ? 'role-officer' : 'role-cadet';
+    return `<span class="role-badge ${cls}">${role}</span>`;
+  }
+
+  function renderUsers(list) {
+    if (!list.length) {
+      document.getElementById('users-tbody').innerHTML =
+        '<tr><td colspan="6" style="text-align:center;color:#6c757d;padding:24px">No users found.</td></tr>';
+      return;
+    }
+    document.getElementById('users-tbody').innerHTML = list.map(u => `
+      <tr>
+        <td style="color:#6c757d">${u.id}</td>
+        <td><strong>${u.name}</strong></td>
+        <td>${u.email}</td>
+        <td>${roleBadge(u.role)}</td>
+        <td style="color:#6c757d;font-size:12px">${u.created_at ? u.created_at.split('T')[0] : '—'}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-sm" onclick="openEdit(${u.id},'${esc(u.name)}','${esc(u.email)}','${u.role}')">✏️ Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteUser(${u.id},'${esc(u.name)}')">🗑️</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  async function loadUsers() {
+    document.getElementById('users-tbody').innerHTML =
+      '<tr><td colspan="6" style="text-align:center;color:#6c757d;padding:24px">Loading…</td></tr>';
+    allUsers = await apiAdminGetUsers();
+    renderUsers(allUsers);
+  }
+
+  function filterUsers() {
+    const q = document.getElementById('user-search').value.toLowerCase();
+    renderUsers(allUsers.filter(u =>
+      u.name.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q) ||
+      u.role.toLowerCase().includes(q)
+    ));
+  }
+
+  // ── Pending Approvals ────────────────────────────────────────────────────
+  async function loadPending() {
+    document.getElementById('pending-tbody').innerHTML =
+      '<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:24px">Loading…</td></tr>';
+    const cadets = await apiGetCadets();
+    const pending = cadets.filter(c => !c.approved);
+    if (!pending.length) {
+      document.getElementById('pending-tbody').innerHTML =
+        '<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:24px">No pending cadets 🎉</td></tr>';
+      return;
+    }
+    document.getElementById('pending-tbody').innerHTML = pending.map(c => `
+      <tr class="pending-row">
+        <td><strong>${c.roll_no}</strong></td>
+        <td>${c.name}</td>
+        <td>${c.email}</td>
+        <td>${c.unit}</td>
+        <td>
+          <div class="action-btns">
+            <button class="btn btn-sm" style="background:#d4edda;color:#155724;border-color:#c3e6cb"
+              onclick="approveCadet(${c.id})">✅ Approve</button>
+            <button class="btn btn-sm btn-danger"
+              onclick="rejectCadet(${c.id}, '${esc(c.name)}')">❌ Reject</button>
+          </div>
+        </td>
+      </tr>`).join('');
+    // Update pending stat badge
+    document.getElementById('s-pending').textContent = pending.length;
+  }
+
+  async function approveCadet(id) {
+    const res = await apiAdminApproveCadet(id);
+    showToast(res.message || 'Approved');
+    loadPending(); loadStats();
+  }
+
+  async function rejectCadet(id, name) {
+    if (!confirm(`Reject and remove cadet "${name}"? This cannot be undone.`)) return;
+    const res = await apiAdminRejectCadet(id);
+    showToast(res.message || 'Rejected');
+    loadPending(); loadStats();
+  }
+
+  // ── Create user ──────────────────────────────────────────────────────────
+  async function createUser() {
+    const data = {
+      name:     document.getElementById('c-name').value.trim(),
+      email:    document.getElementById('c-email').value.trim(),
+      password: document.getElementById('c-password').value,
+      role:     document.getElementById('c-role').value,
+    };
+    if (!data.name || !data.email || !data.password) {
+      document.getElementById('create-alert').innerHTML =
+        '<div class="alert alert-danger">Please fill all fields.</div>';
+      return;
+    }
+    const res = await apiAdminCreateUser(data);
+    if (res.message) {
+      document.getElementById('create-alert').innerHTML =
+        `<div class="alert alert-success">${res.message}</div>`;
+      document.getElementById('c-name').value = '';
+      document.getElementById('c-email').value = '';
+      document.getElementById('c-password').value = '';
+      loadStats();
+    } else {
+      document.getElementById('create-alert').innerHTML =
+        `<div class="alert alert-danger">${res.detail || 'Error creating user'}</div>`;
+    }
+  }
+
+  // ── Edit modal ───────────────────────────────────────────────────────────
+  function openEdit(id, name, email, role) {
+    document.getElementById('edit-id').value       = id;
+    document.getElementById('edit-name').value     = name;
+    document.getElementById('edit-email').value    = email;
+    document.getElementById('edit-role').value     = role;
+    document.getElementById('edit-password').value = '';
+    document.getElementById('edit-alert').innerHTML = '';
+    document.getElementById('edit-modal').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('edit-modal').classList.remove('open');
+  }
+
+  async function saveEdit() {
+    const id = document.getElementById('edit-id').value;
+    const data = {
+      name:  document.getElementById('edit-name').value.trim(),
+      email: document.getElementById('edit-email').value.trim(),
+      role:  document.getElementById('edit-role').value,
+    };
+    const pw = document.getElementById('edit-password').value;
+    if (pw) data.password = pw;
+
+    const res = await apiAdminUpdateUser(id, data);
+    if (res.message) {
+      closeModal();
+      showToast('User updated successfully');
+      loadUsers(); loadStats();
+    } else {
+      document.getElementById('edit-alert').innerHTML =
+        `<div class="alert alert-danger">${res.detail || 'Error updating user'}</div>`;
+    }
+  }
+
+  // ── Delete user ──────────────────────────────────────────────────────────
+  async function deleteUser(id, name) {
+    if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
+    const res = await apiAdminDeleteUser(id);
+    showToast(res.message || 'User deleted');
+    loadUsers(); loadStats();
+  }
+
+  // ── Toast ────────────────────────────────────────────────────────────────
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    Object.assign(t.style, {
+      position:'fixed', bottom:'24px', right:'24px',
+      background:'#1a2744', color:'#fff',
+      padding:'10px 18px', borderRadius:'8px',
+      fontSize:'13px', zIndex:'9999',
+      boxShadow:'0 4px 12px rgba(0,0,0,0.2)',
+      transition:'opacity .3s'
+    });
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+  }
+
+  function esc(s) { return String(s).replace(/'/g, "\\'"); }
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  loadStats();
+  loadUsers();
+
+  // ── Password Strength Indicator ──────────────────────────────────────────
+  function checkPwdStrength(pw, targetId) {
+    const el = document.getElementById(targetId);
+    if (!pw) { el.textContent = ''; return; }
+    let score = 0;
+    if (pw.length >= 8)              score++;
+    if (/[A-Z]/.test(pw))            score++;
+    if (/[a-z]/.test(pw))            score++;
+    if (/\d/.test(pw))               score++;
+    if (/[!@#$%^&*()\-_=+\[\]{};:'",.<>?/`~\\|]/.test(pw)) score++;
+    const labels = ['Very Weak','Weak','Fair','Good','Strong'];
+    const colors = ['#dc3545','#fd7e14','#ffc107','#198754','#0d6efd'];
+    el.textContent = '🔒 ' + (labels[score-1] || 'Very Weak');
+    el.style.color = colors[score-1] || '#dc3545';
+  }
+  window.checkPwdStrength = checkPwdStrength;
+</script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login — NCC Management</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body { background: #0d1b2a; }
+
+    .admin-login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0d1b2a 0%, #1a2744 60%, #0d2137 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative background grid */
+    .admin-login-page::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(91,141,238,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(91,141,238,0.07) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    .admin-login-card {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(91,141,238,0.25);
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 400px;
+      max-width: 95vw;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(91,141,238,0.15);
+      border: 1px solid rgba(91,141,238,0.3);
+      color: #5b8dee;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .admin-login-logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .admin-login-logo h1 {
+      font-size: 26px;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .admin-login-logo p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .shield-icon {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #1a2744, #2d4a8a);
+      border: 2px solid rgba(91,141,238,0.4);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin: 0 auto 14px;
+      box-shadow: 0 4px 20px rgba(91,141,238,0.2);
+    }
+
+    .admin-form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .admin-form-control {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 9px;
+      color: #fff;
+      font-size: 14px;
+      transition: border-color 0.2s, background 0.2s;
+      outline: none;
+    }
+
+    .admin-form-control::placeholder { color: rgba(255,255,255,0.2); }
+    .admin-form-control:focus {
+      border-color: rgba(91,141,238,0.6);
+      background: rgba(91,141,238,0.08);
+    }
+
+    .admin-form-group { margin-bottom: 16px; position: relative; }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 34px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.35);
+      font-size: 15px;
+      user-select: none;
+    }
+    .password-toggle:hover { color: rgba(255,255,255,0.7); }
+
+    .btn-admin-login {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #1a2744, #2d4a8a);
+      border: 1px solid rgba(91,141,238,0.4);
+      color: #fff;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: all 0.2s;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-admin-login:hover {
+      background: linear-gradient(135deg, #243660, #3a5fad);
+      box-shadow: 0 4px 20px rgba(91,141,238,0.3);
+    }
+    .btn-admin-login:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .back-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.3);
+    }
+    .back-link a { color: rgba(91,141,238,0.8); text-decoration: none; }
+    .back-link a:hover { color: #5b8dee; }
+
+    .admin-alert {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .admin-alert-danger {
+      background: rgba(220,53,69,0.15);
+      border: 1px solid rgba(220,53,69,0.3);
+      color: #ff8fa3;
+    }
+    .admin-alert-success {
+      background: rgba(40,167,69,0.15);
+      border: 1px solid rgba(40,167,69,0.3);
+      color: #75db9e;
+    }
+
+    .security-note {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,193,7,0.08);
+      border: 1px solid rgba(255,193,7,0.2);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 11px;
+      color: rgba(255,193,7,0.7);
+      margin-bottom: 20px;
+    }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="admin-login-page">
+    <div class="admin-login-card">
+
+      <div class="admin-login-logo">
+        <div class="shield-icon">🛡️</div>
+        <div style="display:flex;justify-content:center;margin-bottom:10px">
+          <span class="admin-badge">⚡ Restricted Access</span>
+        </div>
+        <h1>Admin Portal</h1>
+        <p>NCC Management System</p>
+      </div>
+
+      <div class="security-note">
+        🔒 This area is restricted to authorized administrators only
+      </div>
+
+      <div id="alert-box"></div>
+
+      <div class="admin-form-group">
+        <label class="admin-form-label">Admin Email</label>
+        <input type="email" id="admin-email" class="admin-form-control"
+               placeholder="admin@ncc.com" autocomplete="username" />
+      </div>
+
+      <div class="admin-form-group">
+        <label class="admin-form-label">Password</label>
+        <input type="password" id="admin-password" class="admin-form-control"
+               placeholder="••••••••" autocomplete="current-password" id="pwd-field" />
+        <span class="password-toggle" onclick="togglePwd()" id="pwd-eye">👁</span>
+      </div>
+
+      <button class="btn-admin-login" onclick="doAdminLogin()" id="login-btn">
+        <div class="spinner" id="login-spinner"></div>
+        <span id="login-btn-text">Sign In as Admin</span>
+      </button>
+
+      <div class="back-link">
+        Not an admin? <a href="index.html">← Back to cadet login</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    // If already logged in as admin, go straight to admin panel
+    if (localStorage.getItem('ncc_token') && localStorage.getItem('ncc_role') === 'admin') {
+      window.location.href = 'pages/admin.html';
+    }
+
+    function showAlert(msg, type) {
+      document.getElementById('alert-box').innerHTML =
+        `<div class="admin-alert admin-alert-${type}">${msg}</div>`;
+    }
+
+    function togglePwd() {
+      const inp = document.getElementById('admin-password');
+      const eye = document.getElementById('pwd-eye');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        eye.textContent = '🙈';
+      } else {
+        inp.type = 'password';
+        eye.textContent = '👁';
+      }
+    }
+
+    async function doAdminLogin() {
+      const email    = document.getElementById('admin-email').value.trim();
+      const password = document.getElementById('admin-password').value;
+
+      if (!email || !password) {
+        showAlert('Please enter your admin email and password', 'danger');
+        return;
+      }
+
+      // Show loading state
+      const btn     = document.getElementById('login-btn');
+      const spinner = document.getElementById('login-spinner');
+      const btnText = document.getElementById('login-btn-text');
+      btn.disabled       = true;
+      spinner.style.display = 'block';
+      btnText.textContent   = 'Signing in…';
+
+      try {
+        const res = await apiLogin(email, password);
+
+        if (res.access_token) {
+          if (res.role !== 'admin') {
+            showAlert('⚠️ Access denied. This portal is for admins only.', 'danger');
+            btn.disabled       = false;
+            spinner.style.display = 'none';
+            btnText.textContent   = 'Sign In as Admin';
+            return;
+          }
+          localStorage.setItem('ncc_token',   res.access_token);
+          localStorage.setItem('ncc_role',    res.role);
+          localStorage.setItem('ncc_name',    res.name);
+          localStorage.setItem('ncc_user_id', res.user_id);
+          showAlert('✅ Authentication successful. Redirecting…', 'success');
+          setTimeout(() => { window.location.href = 'pages/admin.html'; }, 800);
+        } else {
+          showAlert('❌ ' + (res.detail || 'Invalid credentials'), 'danger');
+          btn.disabled       = false;
+          spinner.style.display = 'none';
+          btnText.textContent   = 'Sign In as Admin';
+        }
+      } catch (err) {
+        showAlert('❌ Connection error. Is the server running?', 'danger');
+        btn.disabled       = false;
+        spinner.style.display = 'none';
+        btnText.textContent   = 'Sign In as Admin';
+      }
+    }
+
+    // Enter key support
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') doAdminLogin();
+    });
+  </script>
+</body>
+</html>

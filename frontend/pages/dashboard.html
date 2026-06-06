@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — NCC Management</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><h2>🎖️ The Cadet</h2><p>NCC Management</p></div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="user-initials">?</div>
+      <div>
+        <div style="font-size:13px;font-weight:600" id="user-name">Loading...</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45)" id="user-role">—</div>
+      </div>
+    </div>
+    <!-- CADET NAV -->
+    <nav class="nav" id="nav-cadet" style="display:none">
+      <a href="dashboard.html" class="active">🏠 Dashboard</a>
+      <a href="events.html">🚩 Events</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <a href="profile.html">👤 My Profile</a>
+    </nav>
+    <!-- ADMIN NAV -->
+    <nav class="nav" id="nav-admin" style="display:none">
+      <a href="dashboard.html" class="active">🏠 Dashboard</a>
+      <a href="cadets.html">👥 Cadets</a>
+      <a href="attendance.html">✅ Attendance</a>
+      <a href="events.html">🚩 Events</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <a href="profile.html">👤 My Profile</a>
+      <a href="admin.html">🛡️ Admin Panel</a>
+    </nav>
+    <div style="padding:16px;margin-top:auto;border-top:1px solid rgba(255,255,255,0.1)">
+      <button class="btn btn-sm" style="width:100%;justify-content:center;color:#fff;border-color:rgba(255,255,255,0.2)" onclick="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1 id="dash-title">Dashboard</h1>
+      <span style="font-size:13px;color:#6c757d">1 NCC Battalion &nbsp;|&nbsp; <span class="badge b-green">Active</span></span>
+    </div>
+    <div class="content">
+
+      <!-- ══ ADMIN DASHBOARD ══════════════════════════════════════════════ -->
+      <div id="admin-dash" style="display:none">
+        <div class="stats-grid" style="grid-template-columns:repeat(5,1fr)">
+          <div class="stat-card"><div class="stat-label">Total Cadets</div><div class="stat-value blue" id="a-cadets">—</div><div class="stat-sub">Registered</div></div>
+          <div class="stat-card"><div class="stat-label">Pending Approval</div><div class="stat-value amber" id="a-pending">—</div><div class="stat-sub">Awaiting review</div></div>
+          <div class="stat-card"><div class="stat-label">Officers</div><div class="stat-value blue" id="a-officers">—</div><div class="stat-sub">Active</div></div>
+          <div class="stat-card"><div class="stat-label">Events</div><div class="stat-value amber" id="a-events">—</div><div class="stat-sub">Total</div></div>
+          <div class="stat-card"><div class="stat-label">Attendance Records</div><div class="stat-value green" id="a-attendance">—</div><div class="stat-sub">Total entries</div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
+          <div class="card">
+            <div class="card-header"><h3>⏳ Pending Approvals</h3><a href="admin.html" class="btn btn-sm btn-primary">Manage</a></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Name</th><th>Roll No</th><th>Unit</th></tr></thead>
+                <tbody id="pending-tbody"><tr><td colspan="3" style="text-align:center;color:#6c757d;padding:20px">Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>🚩 Upcoming Events</h3><a href="events.html" class="btn btn-sm">View all</a></div>
+            <div class="card-body" id="a-events-list" style="font-size:13px">Loading...</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <div class="card-header"><h3>👥 Cadet Roster (Top Attendance)</h3><a href="cadets.html" class="btn btn-sm">View all</a></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Roll No</th><th>Rank</th><th>Unit</th><th>Attendance</th><th>Status</th></tr></thead>
+              <tbody id="a-cadets-tbody"><tr><td colspan="6" style="text-align:center;color:#6c757d;padding:20px">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ CADET DASHBOARD ══════════════════════════════════════════════ -->
+      <div id="cadet-dash" style="display:none">
+
+        <!-- Pending banner -->
+        <div id="pending-banner" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#856404">
+          ⏳ <strong>Pending Approval</strong> — Your cadet profile is under review. Some features are limited until an admin approves your account.
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card"><div class="stat-label">My Attendance</div><div class="stat-value blue" id="c-att-pct">—</div><div class="stat-sub">Overall percentage</div></div>
+          <div class="stat-card"><div class="stat-label">Days Present</div><div class="stat-value green" id="c-present">—</div><div class="stat-sub">Out of total</div></div>
+          <div class="stat-card"><div class="stat-label">Days Absent</div><div class="stat-value red" id="c-absent">—</div><div class="stat-sub">Missed sessions</div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
+          <!-- My Profile Card -->
+          <div class="card">
+            <div class="card-header"><h3>👤 My Profile</h3><a href="profile.html" class="btn btn-sm">Edit</a></div>
+            <div class="card-body" id="c-profile">
+              <div style="text-align:center;color:#6c757d;padding:20px">Loading...</div>
+            </div>
+          </div>
+
+          <!-- Attendance breakdown -->
+          <div class="card">
+            <div class="card-header"><h3>📊 Attendance Breakdown</h3></div>
+            <div class="card-body" id="c-att-detail">
+              <div style="text-align:center;color:#6c757d;padding:20px">Loading...</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
+          <!-- Upcoming Events -->
+          <div class="card">
+            <div class="card-header"><h3>🚩 Upcoming Events</h3><a href="events.html" class="btn btn-sm">View all</a></div>
+            <div class="card-body" id="c-events" style="font-size:13px">Loading...</div>
+          </div>
+          <!-- Announcements -->
+          <div class="card">
+            <div class="card-header"><h3>📢 Latest Announcements</h3><a href="announcements.html" class="btn btn-sm">View all</a></div>
+            <div class="card-body" id="c-announcements" style="font-size:13px">Loading...</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+  requireAuth();
+  const role = getRole();
+  const name = getName();
+
+  document.getElementById('user-name').textContent     = name || 'User';
+  document.getElementById('user-role').textContent     = role === 'admin' ? 'System Admin' : 'NCC Cadet';
+  document.getElementById('user-initials').textContent = (name||'U').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+
+  function logout() { localStorage.clear(); window.location.href = '../index.html'; }
+
+  // Show correct nav + dashboard section
+  if (role === 'admin') {
+    document.getElementById('nav-admin').style.display = '';
+    document.getElementById('admin-dash').style.display = '';
+    document.getElementById('dash-title').textContent = '🛡️ Admin Dashboard';
+    loadAdminDash();
+  } else {
+    document.getElementById('nav-cadet').style.display = '';
+    document.getElementById('cadet-dash').style.display = '';
+    document.getElementById('dash-title').textContent = '🏠 My Dashboard';
+    loadCadetDash();
+  }
+
+  // ══ ADMIN ══════════════════════════════════════════════════════════════════
+  const rankBadge = r => {
+    const m = {Sergeant:'b-blue',Corporal:'b-green',Private:'b-gray',Cadet:'b-amber'};
+    return `<span class="badge ${m[r]||'b-gray'}">${r}</span>`;
+  };
+  const typeColor = {Parade:'b-blue',Camp:'b-green',Drill:'b-amber',Ceremony:'b-green',Training:'b-amber'};
+
+  async function loadAdminDash() {
+    const [stats, cadets, events] = await Promise.all([
+      apiAdminStats(),
+      apiGetCadets(),
+      apiGetEvents()
+    ]);
+
+    document.getElementById('a-cadets').textContent     = stats.total_cadets     ?? '—';
+    document.getElementById('a-pending').textContent    = stats.pending_cadets   ?? '—';
+    document.getElementById('a-officers').textContent   = stats.officers         ?? '—';
+    document.getElementById('a-events').textContent     = stats.total_events     ?? '—';
+    document.getElementById('a-attendance').textContent = stats.total_attendance ?? '—';
+
+    // Pending approvals
+    const pending = cadets.filter(c => !c.approved).slice(0, 5);
+    document.getElementById('pending-tbody').innerHTML = pending.length
+      ? pending.map(c => `<tr><td><strong>${c.name}</strong></td><td style="font-size:12px;color:#6c757d">${c.roll_no}</td><td>${c.unit}</td></tr>`).join('')
+      : '<tr><td colspan="3" style="text-align:center;color:#6c757d;padding:16px">🎉 No pending approvals</td></tr>';
+
+    // Cadet roster top 6
+    const sorted = [...cadets].sort((a,b) => b.attendance - a.attendance).slice(0, 6);
+    document.getElementById('a-cadets-tbody').innerHTML = sorted.map(c => {
+      const attColor = c.attendance >= 90 ? '#639922' : c.attendance >= 75 ? '#BA7517' : '#E24B4A';
+      return `<tr>
+        <td><strong>${c.name}</strong></td>
+        <td style="font-size:12px;color:#6c757d">${c.roll_no}</td>
+        <td>${rankBadge(c.rank)}</td>
+        <td style="font-size:13px">${c.unit}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="progress" style="width:80px"><div class="progress-bar" style="width:${c.attendance}%;background:${attColor}"></div></div>
+            <span style="font-size:12px;font-weight:600">${c.attendance}%</span>
+          </div>
+        </td>
+        <td>${c.approved ? '<span class="badge b-green">Approved</span>' : '<span class="badge b-amber">Pending</span>'}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" style="text-align:center;color:#6c757d;padding:20px">No cadets found</td></tr>';
+
+    // Events
+    renderEventsList('a-events-list', events);
+  }
+
+  // ══ CADET ══════════════════════════════════════════════════════════════════
+  async function loadCadetDash() {
+    const [cadets, events, anns] = await Promise.all([
+      apiGetCadets(),
+      apiGetEvents(),
+      apiGetAnnouncements()
+    ]);
+
+    // Find my cadet record
+    const userId = parseInt(getUserId());
+    const me = cadets.find(c => c.user_id === userId) || cadets.find(c => c.name === name);
+
+    if (me) {
+      if (!me.approved) {
+        document.getElementById('pending-banner').style.display = '';
+      }
+      // Stats
+      const pct = me.attendance || 0;
+      document.getElementById('c-att-pct').textContent  = pct + '%';
+      document.getElementById('c-present').textContent  = '—';
+      document.getElementById('c-absent').textContent   = '—';
+
+      // Profile card
+      document.getElementById('c-profile').innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f2f5">
+            <span style="color:#6c757d;font-size:12px;text-transform:uppercase;font-weight:600">Name</span>
+            <span style="font-weight:600">${me.name}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f2f5">
+            <span style="color:#6c757d;font-size:12px;text-transform:uppercase;font-weight:600">Roll No</span>
+            <span style="font-weight:600">${me.roll_no}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f2f5">
+            <span style="color:#6c757d;font-size:12px;text-transform:uppercase;font-weight:600">Rank</span>
+            <span>${rankBadge(me.rank)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f2f5">
+            <span style="color:#6c757d;font-size:12px;text-transform:uppercase;font-weight:600">Unit</span>
+            <span style="font-weight:600">${me.unit}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0">
+            <span style="color:#6c757d;font-size:12px;text-transform:uppercase;font-weight:600">Status</span>
+            <span>${me.approved ? '<span class="badge b-green">✅ Approved</span>' : '<span class="badge b-amber">⏳ Pending</span>'}</span>
+          </div>
+        </div>`;
+
+      // Attendance breakdown bar + recent records
+      loadMyAttendance(me.id);
+    } else {
+      document.getElementById('c-profile').innerHTML = '<p style="color:#6c757d;font-size:13px;text-align:center;padding:20px">No cadet profile linked to your account.</p>';
+      document.getElementById('c-att-detail').innerHTML = '<p style="color:#6c757d;font-size:13px;text-align:center;padding:20px">No attendance data.</p>';
+    }
+
+    renderEventsList('c-events', events);
+
+    // Announcements
+    document.getElementById('c-announcements').innerHTML = anns.length
+      ? anns.slice(0, 4).map(a => `
+          <div style="padding:10px 0;border-bottom:1px solid #f0f2f5">
+            <div style="font-weight:600;font-size:13px">📢 ${a.title}</div>
+            <div style="font-size:11px;color:#6c757d;margin:2px 0">${new Date(a.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div>
+            <div style="font-size:13px;color:#495057;margin-top:4px">${a.body.length > 100 ? a.body.slice(0,100)+'…' : a.body}</div>
+          </div>`).join('')
+      : '<p style="color:#6c757d;text-align:center;padding:20px">No announcements yet</p>';
+  }
+
+  async function loadMyAttendance(cadetId) {
+    try {
+      const att = await apiGetMyAttendance();
+      document.getElementById('c-present').textContent = att.present;
+      document.getElementById('c-absent').textContent  = att.absent;
+      document.getElementById('c-att-pct').textContent = att.percentage + '%';
+
+      const pct = att.percentage;
+      const color = pct >= 90 ? '#639922' : pct >= 75 ? '#BA7517' : '#E24B4A';
+      const recentRecords = (att.records || []).slice(-10).reverse();
+
+      document.getElementById('c-att-detail').innerHTML = `
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px">
+            <span>Attendance Rate</span>
+            <span style="font-weight:700;color:${color}">${pct}%</span>
+          </div>
+          <div class="progress" style="height:10px">
+            <div class="progress-bar" style="width:${pct}%;background:${color}"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:#6c757d">
+            <span>Total: ${att.total_days} days</span>
+            <span>Present: ${att.present} &nbsp;|&nbsp; Absent: ${att.absent}</span>
+          </div>
+        </div>
+        ${recentRecords.length ? `
+        <div style="font-size:12px;font-weight:600;color:#6c757d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Recent Records</div>
+        ${recentRecords.map(r => `
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f8f9fa;font-size:13px">
+            <span>${r.date}</span>
+            <span class="badge ${r.status==='present'?'b-green':r.status==='leave'?'b-amber':'b-red'}">${r.status}</span>
+          </div>`).join('')}` : '<p style="color:#6c757d;font-size:13px">No attendance records yet.</p>'}`;
+    } catch(e) {
+      document.getElementById('c-att-detail').innerHTML = '<p style="color:#6c757d;font-size:13px;text-align:center;padding:20px">Could not load attendance.</p>';
+    }
+  }
+
+  function renderEventsList(elId, events) {
+    document.getElementById(elId).innerHTML = events.slice(0, 5).map(e => `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f0f2f5">
+        <div style="background:#e8f0fe;border-radius:8px;padding:8px 10px;text-align:center;min-width:46px">
+          <div style="font-size:16px;font-weight:700;color:#185FA5;line-height:1">${e.date.split('-')[2]}</div>
+          <div style="font-size:10px;color:#185FA5;text-transform:uppercase">${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(e.date.split('-')[1])-1]}</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:13px">${e.name}</div>
+          <div style="font-size:12px;color:#6c757d">${e.venue}</div>
+        </div>
+        <span class="badge ${typeColor[e.type]||'b-blue'}">${e.type}</span>
+      </div>`).join('') || '<p style="color:#6c757d;text-align:center;padding:20px">No events yet</p>';
+  }
+</script>
+</body>
+</html>

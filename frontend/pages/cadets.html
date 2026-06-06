@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadets — NCC Management</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><h2>🎖️ The Cadet</h2><p>NCC Management</p></div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="user-initials">?</div>
+      <div>
+        <div style="font-size:13px;font-weight:600" id="user-name">Loading...</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45)" id="user-role">—</div>
+      </div>
+    </div>
+    <!-- ADMIN NAV -->
+    <nav class="nav" id="nav-admin" style="display:none">
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="cadets.html" class="active">👥 Cadets</a>
+      <a href="attendance.html">✅ Attendance</a>
+      <a href="events.html">🚩 Events</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <a href="profile.html">👤 My Profile</a>
+      <a href="admin.html">🛡️ Admin Panel</a>
+    </nav>
+    <!-- CADET NAV (read-only) -->
+    <nav class="nav" id="nav-cadet" style="display:none">
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="events.html">🚩 Events</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <a href="profile.html">👤 My Profile</a>
+    </nav>
+    <div style="padding:16px;margin-top:auto;border-top:1px solid rgba(255,255,255,0.1)">
+      <button class="btn btn-sm" style="width:100%;justify-content:center;color:#fff;border-color:rgba(255,255,255,0.2)" onclick="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1>Cadet Roster</h1>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="search" class="form-control" style="width:220px" placeholder="Search by name or roll no..." oninput="filterTable()" />
+      </div>
+    </div>
+    <div class="content">
+      <div id="alert-box"></div>
+      <div class="card">
+        <div class="card-header">
+          <h3>All Cadets</h3>
+          <span id="cadet-count" style="font-size:13px;color:#6c757d"></span>
+        </div>
+        <div class="table-wrap">
+          <table id="cadet-table">
+            <thead>
+              <tr>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Rank</th>
+                <th>Unit</th>
+                <th>Attendance</th>
+                <th>Status</th>
+                <th id="actions-header">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cadet-tbody">
+              <tr><td colspan="7" style="text-align:center;padding:30px;color:#6c757d">Loading cadets...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Cadet Modal (Admin / Officer) -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header"><h3>Update Cadet</h3><button class="btn btn-sm" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-id"/>
+      <div class="form-group">
+        <label class="form-label">Rank</label>
+        <select id="edit-rank" class="form-control">
+          <option>Cadet</option><option>Private</option><option>Corporal</option><option>Sergeant</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Unit</label>
+        <select id="edit-unit" class="form-control">
+          <option>Alpha Company</option><option>Bravo Company</option><option>Charlie Company</option>
+        </select>
+      </div>
+      <!-- Approval Status: visible to Admin only -->
+      <div class="form-group" id="approval-group" style="display:none">
+        <label class="form-label">
+          Approval Status
+          <span style="font-size:11px;color:#6c757d;font-weight:400">(Admin only)</span>
+        </label>
+        <select id="edit-approved" class="form-control">
+          <option value="true">✅ Approved</option>
+          <option value="false">⏳ Pending</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+  requireAuth();
+
+  const role = getRole();
+
+  // Show correct nav
+  if (role === 'admin') {
+    document.getElementById('nav-admin').style.display = '';
+  } else {
+    document.getElementById('nav-cadet').style.display = '';
+  }
+
+  // Show approval field only for admin
+  if (role === 'admin') {
+    document.getElementById('approval-group').style.display = '';
+  }
+
+  // Hide Actions column entirely for plain cadets
+  if (role === 'cadet') {
+    document.getElementById('actions-header').style.display = 'none';
+  }
+
+  document.getElementById('user-name').textContent     = getName();
+  document.getElementById('user-role').textContent     = role === 'officer' ? 'NCC Officer' : role === 'admin' ? 'System Admin' : 'Cadet';
+  document.getElementById('user-initials').textContent = (getName()||'U').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+
+  function logout() { localStorage.clear(); window.location.href = '../index.html'; }
+
+  let allCadets = [];
+  const rankBadge = r => {
+    const m = { Sergeant:'b-blue', Corporal:'b-green', Private:'b-gray', Cadet:'b-amber' };
+    return `<span class="badge ${m[r]||'b-gray'}">${r}</span>`;
+  };
+
+  async function loadCadets() {
+    allCadets = await apiGetCadets();
+    document.getElementById('cadet-count').textContent = allCadets.length + ' cadets';
+    renderTable(allCadets);
+  }
+
+  function renderTable(list) {
+    document.getElementById('cadet-tbody').innerHTML = list.length ? list.map(c => {
+      const attColor = c.attendance >= 90 ? '#639922' : c.attendance >= 75 ? '#BA7517' : '#E24B4A';
+
+      // Build action buttons based on role
+      let actions = '';
+      if (role === 'admin' || role === 'officer') {
+        actions = `<button class="btn btn-sm" onclick="openEdit(${c.id},'${c.rank}','${c.unit}',${c.approved})">✏️ Edit</button>`;
+      }
+      if (role === 'admin') {
+        actions += ` <button class="btn btn-sm btn-danger" onclick="deleteCadet(${c.id})" style="margin-left:4px">🗑️ Delete</button>`;
+      }
+
+      return `
+        <tr>
+          <td style="color:#6c757d;font-size:12px">${c.roll_no}</td>
+          <td><strong>${c.name}</strong></td>
+          <td>${rankBadge(c.rank)}</td>
+          <td style="font-size:13px">${c.unit}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="progress" style="width:80px"><div class="progress-bar" style="width:${c.attendance}%;background:${attColor}"></div></div>
+              <span style="font-size:12px;font-weight:600">${c.attendance}%</span>
+            </div>
+          </td>
+          <td>${c.approved ? '<span class="badge b-green">Approved</span>' : '<span class="badge b-amber">Pending</span>'}</td>
+          <td ${role === 'cadet' ? 'style="display:none"' : ''}>${actions}</td>
+        </tr>`;
+    }).join('')
+    : '<tr><td colspan="7" style="text-align:center;padding:30px;color:#6c757d">No cadets found</td></tr>';
+  }
+
+  function filterTable() {
+    const q = document.getElementById('search').value.toLowerCase();
+    renderTable(allCadets.filter(c =>
+      c.name.toLowerCase().includes(q) || c.roll_no.toLowerCase().includes(q)
+    ));
+  }
+
+  function openEdit(id, rank, unit, approved) {
+    document.getElementById('edit-id').value       = id;
+    document.getElementById('edit-rank').value     = rank;
+    document.getElementById('edit-unit').value     = unit;
+    document.getElementById('edit-approved').value = approved ? 'true' : 'false';
+    document.getElementById('edit-modal').classList.add('open');
+  }
+  function closeModal() { document.getElementById('edit-modal').classList.remove('open'); }
+
+  async function saveEdit() {
+    const id = document.getElementById('edit-id').value;
+    const payload = {
+      rank: document.getElementById('edit-rank').value,
+      unit: document.getElementById('edit-unit').value,
+    };
+    // Only include approved if admin
+    if (role === 'admin') {
+      payload.approved = document.getElementById('edit-approved').value === 'true';
+    }
+    const res = await apiUpdateCadet(id, payload);
+    if (res.detail) {
+      alert('Error: ' + res.detail);
+      return;
+    }
+    closeModal();
+    loadCadets();
+  }
+
+  async function deleteCadet(id) {
+    if (!confirm('Delete this cadet? This cannot be undone.')) return;
+    const res = await apiDeleteCadet(id);
+    if (res.detail) { alert('Error: ' + res.detail); return; }
+    loadCadets();
+  }
+
+  loadCadets();
+</script>
+</body>
+</html>

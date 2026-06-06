@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Cadet — Login</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-logo">
+        <h1>🎖️ The Cadet</h1>
+        <p>NCC Management System</p>
+      </div>
+
+      <div id="alert-box"></div>
+
+      <!-- LOGIN FORM -->
+      <div id="login-form">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="login-email" class="form-control" placeholder="officer@ncc.in" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="login-password" class="form-control" placeholder="••••••••" />
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="doLogin()">
+          Login
+        </button>
+        <p style="text-align:center;margin-top:14px;font-size:13px;color:#6c757d">
+          New cadet? <a href="#" onclick="showRegister()" style="color:#185FA5">Register here</a>
+        </p>
+        <p style="text-align:center;margin-top:8px;font-size:12px;color:#adb5bd">
+          Are you an admin? <a href="admin-login.html" style="color:#6c757d">Admin Portal →</a>
+        </p>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="register-form" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" id="reg-name" class="form-control" placeholder="Ramesh Kumar" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="reg-email" class="form-control" placeholder="cadet@ncc.in" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="reg-password" class="form-control" placeholder="••••••••" />
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Roll Number</label>
+            <input type="text" id="reg-roll" class="form-control" placeholder="NCC2024001" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unit</label>
+            <select id="reg-unit" class="form-control">
+              <option>Alpha Company</option>
+              <option>Bravo Company</option>
+              <option>Charlie Company</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doRegister()">
+          Register as Cadet
+        </button>
+        <p style="text-align:center;margin-top:14px;font-size:13px;color:#6c757d">
+          Already registered? <a href="#" onclick="showLogin()" style="color:#185FA5">Login here</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    function showAlert(msg, type) {
+      document.getElementById('alert-box').innerHTML =
+        `<div class="alert alert-${type}">${msg}</div>`;
+    }
+
+    function showRegister() {
+      document.getElementById('login-form').style.display    = 'none';
+      document.getElementById('register-form').style.display = 'block';
+      document.getElementById('alert-box').innerHTML = '';
+    }
+
+    function showLogin() {
+      document.getElementById('login-form').style.display    = 'block';
+      document.getElementById('register-form').style.display = 'none';
+      document.getElementById('alert-box').innerHTML = '';
+    }
+
+    async function doLogin() {
+      const email    = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (!email || !password) { showAlert('Please enter email and password', 'danger'); return; }
+
+      const res = await apiLogin(email, password);
+      if (res.access_token) {
+        localStorage.setItem('ncc_token',   res.access_token);
+        localStorage.setItem('ncc_role',    res.role);
+        localStorage.setItem('ncc_name',    res.name);
+        localStorage.setItem('ncc_user_id', res.user_id);
+        // Redirect admin to admin panel, others to dashboard
+        if (res.role === 'admin') {
+          window.location.href = 'pages/admin.html';
+        } else {
+          window.location.href = 'pages/dashboard.html';
+        }
+      } else {
+        showAlert(res.detail || 'Login failed', 'danger');
+      }
+    }
+
+    async function doRegister() {
+      const data = {
+        name:     document.getElementById('reg-name').value.trim(),
+        email:    document.getElementById('reg-email').value.trim(),
+        password: document.getElementById('reg-password').value,
+        roll_no:  document.getElementById('reg-roll').value.trim(),
+        unit:     document.getElementById('reg-unit').value,
+        role:     'cadet'
+      };
+      if (!data.name || !data.email || !data.password || !data.roll_no) {
+        showAlert('Please fill all fields', 'danger'); return;
+      }
+      const res = await apiRegister(data);
+      if (res.message) {
+        showAlert(res.message + ' Please login.', 'success');
+        showLogin();
+      } else {
+        showAlert(res.detail || 'Registration failed', 'danger');
+      }
+    }
+
+    // Enter key support
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        if (document.getElementById('register-form').style.display !== 'none') doRegister();
+        else doLogin();
+      }
+    });
+  </script>
+</body>
+</html>

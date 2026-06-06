@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Events — NCC Management</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><h2>🎖️ The Cadet</h2><p>NCC Management</p></div>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" id="user-initials">?</div>
+      <div>
+        <div style="font-size:13px;font-weight:600" id="user-name">—</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.45)" id="user-role">—</div>
+      </div>
+    </div>
+    <!-- CADET NAV -->
+    <nav class="nav" id="nav-cadet" style="display:none">
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="events.html" class="active">🚩 Events</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <a href="profile.html">👤 My Profile</a>
+    </nav>
+    <!-- ADMIN NAV -->
+    <nav class="nav" id="nav-admin" style="display:none">
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="cadets.html">👥 Cadets</a>
+      <a href="attendance.html">✅ Attendance</a>
+      <a href="events.html" class="active">🚩 Events</a>
+      <a href="announcements.html">📢 Announcements</a>
+      <a href="profile.html">👤 My Profile</a>
+      <a href="admin.html">🛡️ Admin Panel</a>
+    </nav>
+    <div style="padding:16px;margin-top:auto;border-top:1px solid rgba(255,255,255,0.1)">
+      <button class="btn btn-sm" style="width:100%;justify-content:center;color:#fff;border-color:rgba(255,255,255,0.2)" onclick="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1>🚩 Events & Parades</h1>
+      <!-- Add Event button: visible to admin only -->
+      <button class="btn btn-primary" id="add-event-btn" style="display:none" onclick="openModal()">+ Add Event</button>
+    </div>
+    <div class="content">
+      <div id="alert-box"></div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Event Name</th><th>Date</th><th>Venue</th><th>Type</th>
+                <th id="actions-th" style="display:none">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="events-tbody"><tr><td colspan="5" style="text-align:center;padding:30px;color:#6c757d">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Event Modal (admin only) -->
+<div class="modal-overlay" id="event-modal">
+  <div class="modal">
+    <div class="modal-header"><h3>Add New Event</h3><button class="btn btn-sm" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Event Name</label><input type="text" id="ev-name" class="form-control" placeholder="Republic Day Parade"/></div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Date</label><input type="date" id="ev-date" class="form-control"/></div>
+        <div class="form-group"><label class="form-label">Type</label>
+          <select id="ev-type" class="form-control"><option>Parade</option><option>Camp</option><option>Drill</option><option>Ceremony</option><option>Training</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Venue</label><input type="text" id="ev-venue" class="form-control" placeholder="Parade Ground, Block A"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addEvent()">Add Event</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/api.js"></script>
+<script>
+  requireAuth();
+  const role = getRole();
+
+  document.getElementById('user-name').textContent     = getName();
+  document.getElementById('user-role').textContent     = role === 'admin' ? 'System Admin' : 'NCC Cadet';
+  document.getElementById('user-initials').textContent = (getName()||'U').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  function logout() { localStorage.clear(); window.location.href = '../index.html'; }
+
+  if (role === 'admin') {
+    document.getElementById('nav-admin').style.display  = '';
+    document.getElementById('add-event-btn').style.display = '';
+    document.getElementById('actions-th').style.display = '';
+  } else {
+    document.getElementById('nav-cadet').style.display = '';
+  }
+
+  const typeColor = {Parade:'b-blue',Camp:'b-green',Drill:'b-amber',Ceremony:'b-green',Training:'b-amber'};
+  function openModal()  { document.getElementById('event-modal').classList.add('open'); }
+  function closeModal() { document.getElementById('event-modal').classList.remove('open'); }
+
+  async function loadEvents() {
+    const events = await apiGetEvents();
+    document.getElementById('events-tbody').innerHTML = events.length
+      ? events.map(e => `<tr>
+          <td><strong>${e.name}</strong></td>
+          <td>${e.date}</td>
+          <td style="color:#6c757d">${e.venue}</td>
+          <td><span class="badge ${typeColor[e.type]||'b-blue'}">${e.type}</span></td>
+          ${role === 'admin' ? `<td><button class="btn btn-sm btn-danger" onclick="deleteEvent(${e.id})">Delete</button></td>` : ''}
+        </tr>`).join('')
+      : `<tr><td colspan="${role==='admin'?5:4}" style="text-align:center;padding:30px;color:#6c757d">No events yet.</td></tr>`;
+  }
+
+  async function addEvent() {
+    const name  = document.getElementById('ev-name').value.trim();
+    const date  = document.getElementById('ev-date').value;
+    const venue = document.getElementById('ev-venue').value.trim();
+    const type  = document.getElementById('ev-type').value;
+    if (!name || !date) { alert('Please fill Event Name and Date'); return; }
+    const res = await apiCreateEvent({ name, date, venue, type, created_by: parseInt(getUserId()) });
+    if (res.detail) { alert('Error: ' + res.detail); return; }
+    closeModal();
+    document.getElementById('ev-name').value = document.getElementById('ev-venue').value = '';
+    loadEvents();
+  }
+
+  async function deleteEvent(id) {
+    if (!confirm('Delete this event?')) return;
+    const res = await apiDeleteEvent(id);
+    if (res.detail) { alert('Error: ' + res.detail); return; }
+    loadEvents();
+  }
+
+  loadEvents();
+</script>
+</body>
+</html>
