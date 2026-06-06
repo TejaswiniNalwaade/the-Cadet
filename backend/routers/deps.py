@@ -5,8 +5,8 @@ from fastapi import Header, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import Optional
 from jose import jwt, JWTError
-from backend.database import get_db
-from backend.models.models import User
+from database import get_db
+from models.models import User
 
 SECRET_KEY = "ncc_secret_key_change_in_production"
 ALGORITHM  = "HS256"

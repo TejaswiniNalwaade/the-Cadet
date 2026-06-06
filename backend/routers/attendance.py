@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List
 from datetime import date
-from backend.database import get_db
-from backend.models.models import Attendance, Cadet, User
-from backend.routers.deps import require_admin, get_current_user
+from database import get_db
+from models.models import Attendance, Cadet, User
+from routers.deps import require_admin, get_current_user
 
 router = APIRouter()
 

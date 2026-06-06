@@ -4,8 +4,8 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 from jose import jwt
 from datetime import datetime, timedelta
-from backend.database import get_db
-from backend.models.models import User, Cadet
+from database import get_db
+from models.models import User, Cadet
 
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

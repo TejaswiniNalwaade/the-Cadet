@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.database import engine, Base
-from backend.routers import auth, cadets, attendance, events
-from backend.routers import admin
+from database import engine, Base
+from routers import auth, cadets, attendance, events
+from routers import admin
 
 # Create all tables in PostgreSQL automatically
 Base.metadata.create_all(bind=engine)
